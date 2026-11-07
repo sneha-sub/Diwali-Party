@@ -452,47 +452,69 @@
     return grainTiles[(Math.random() * grainTiles.length) | 0];
   }
 
-  const glowCanvas = document.createElement("canvas");
-  glowCanvas.width = Math.round(W / 10);
-  glowCanvas.height = Math.round(H / 10);
-  const glowCtx = glowCanvas.getContext("2d");
+  // Two small canvases give a smooth, cheap blur (downscale twice, scale back up).
+  const blurA = document.createElement("canvas");
+  blurA.width = Math.round(W / 4);
+  blurA.height = Math.round(H / 4);
+  const blurACtx = blurA.getContext("2d");
+  const blurB = document.createElement("canvas");
+  blurB.width = Math.round(W / 12);
+  blurB.height = Math.round(H / 12);
+  const blurBCtx = blurB.getContext("2d");
 
   const CAN_FILTER = typeof ctx.filter === "string";
 
+  /** Golden instant-film look: soft focus, amber tone, warm lifted shadows,
+   *  creamy highlights, light vignette and fine grain. */
   function filmLook(c) {
-    // Soft haze/bloom: a tiny blurred copy of the photo screened back on top
-    glowCtx.imageSmoothingEnabled = true;
-    glowCtx.clearRect(0, 0, glowCanvas.width, glowCanvas.height);
-    glowCtx.drawImage(c.canvas, 0, 0, glowCanvas.width, glowCanvas.height);
+    blurACtx.imageSmoothingEnabled = blurBCtx.imageSmoothingEnabled = true;
+    blurACtx.drawImage(c.canvas, 0, 0, blurA.width, blurA.height);
+    blurBCtx.drawImage(blurA, 0, 0, blurB.width, blurB.height);
+
     c.save();
     c.imageSmoothingEnabled = true;
+    // Dreamy soft focus: a blurred copy laid over the sharp photo
+    c.globalAlpha = 0.6;
+    c.drawImage(blurA, 0, 0, W, H);
+    // ...and a soft glow in the highlights
     c.globalCompositeOperation = "screen";
-    c.globalAlpha = 0.18;
-    c.drawImage(glowCanvas, 0, 0, W, H);
+    c.globalAlpha = 0.22;
+    c.drawImage(blurB, 0, 0, W, H);
     c.globalAlpha = 1;
 
-    // Faded, milky shadows
-    c.fillStyle = "rgb(36,22,16)";
+    // Warm brown, lifted shadows (low contrast)
+    c.fillStyle = "rgb(16,12,6)";
     c.fillRect(0, 0, W, H);
 
-    // Warm red-orange cast through the skin tones
+    // Pull every colour towards golden amber, keeping light and dark
+    c.globalCompositeOperation = "color";
+    c.globalAlpha = 0.34;
+    c.fillStyle = "rgb(172,132,82)";
+    c.fillRect(0, 0, W, H);
+    c.globalAlpha = 1;
+
+    // Golden warmth through the mid-tones
     c.globalCompositeOperation = "soft-light";
-    c.fillStyle = "rgba(255,112,50,.55)";
+    c.fillStyle = "rgba(255,170,80,.32)";
     c.fillRect(0, 0, W, H);
 
-    // Gentle vignette
+    // Creamy highlights
     c.globalCompositeOperation = "multiply";
-    const v = c.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.8);
+    c.fillStyle = "rgb(255,243,222)";
+    c.fillRect(0, 0, W, H);
+
+    // Light vignette
+    const v = c.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.8);
     v.addColorStop(0, "rgba(255,255,255,0)");
-    v.addColorStop(1, "rgba(110,80,75,.55)");
+    v.addColorStop(1, "rgba(80,58,30,.6)");
     c.fillStyle = v;
     c.fillRect(0, 0, W, H);
 
-    // Visible grain, drawn a bit larger than 1:1 so it survives on a phone screen
+    // Fine grain
     c.globalCompositeOperation = "overlay";
-    c.globalAlpha = 0.32;
+    c.globalAlpha = 0.16;
     const tile = grainTile();
-    const scale = 1.6, step = tile.width * scale;
+    const step = tile.width * 1.2;
     const ox = -Math.random() * step, oy = -Math.random() * step;
     for (let y = oy; y < H; y += step) {
       for (let x = ox; x < W; x += step) c.drawImage(tile, x, y, step, step);
@@ -538,7 +560,7 @@
     c.fillRect(0, 0, W, H);
     if (state.source) {
       // Punch the colour up first so the film fade doesn't leave it looking grey.
-      if (CAN_FILTER) c.filter = "saturate(1.6) contrast(1.06)";
+      if (CAN_FILTER) c.filter = "saturate(1.1)";
       drawCover(c, state.source, 0, 0, W, H, state.mirror);
       if (CAN_FILTER) {
         c.filter = "none";
@@ -546,7 +568,7 @@
         // Browsers without canvas filters: overlay the photo on itself for more colour
         c.save();
         c.globalCompositeOperation = "overlay";
-        c.globalAlpha = 0.45;
+        c.globalAlpha = 0.12;
         c.drawImage(c.canvas, 0, 0);
         c.restore();
       }

@@ -19,7 +19,7 @@ Guests open the booth, pick a filter, add stickers, and strike a pose. **Let's g
   | Festival of Lights | Warm glow, floating lights, a row of diyas |
   | Sparklers | Two sparklers with animated sparks |
   | Clean | Just a small wordmark in the corner |
-- **Film look**: every photo gets a warm, hazy instant-film treatment (soft glow, faded shadows, warm skin tones, vignette, visible grain), in full colour
+- **Film look**: every photo gets a golden instant-film treatment: soft dreamy focus, muted amber tone, low contrast with deep warm shadows, creamy highlights, vignette and fine grain
 - **Lettering rule**: each design uses either the "Lets get LIT!" colour-block banner (drawn in code, Outfit ExtraBold) or the Diwali Party wordmark, never both. Each filter has a `mark` setting for this
 - **Stickers**: tap to add any brand illustration. Drag to move, pinch (or scroll) to resize,
   two-finger twist (or shift+scroll) to rotate, double-tap (or Delete) to remove
