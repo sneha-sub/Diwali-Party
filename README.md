@@ -20,7 +20,7 @@ Guests open the booth, pick a filter, add stickers, and strike a pose. **Let's g
   | Sparklers | Two sparklers with animated sparks |
   | Clean | Just a small wordmark in the corner |
 - **Film look**: every photo gets a warm, hazy instant-film treatment (soft glow, faded shadows, warm skin tones, vignette, visible grain), in full colour
-- **Lettering**: all lettering on photos uses the brand "Lets get LIT!" colour-block banner (drawn in code, Outfit ExtraBold) or the Diwali Party wordmark
+- **Lettering rule**: each design uses either the "Lets get LIT!" colour-block banner (drawn in code, Outfit ExtraBold) or the Diwali Party wordmark, never both. Each filter has a `mark` setting for this
 - **Stickers**: tap to add any brand illustration. Drag to move, pinch (or scroll) to resize,
   two-finger twist (or shift+scroll) to rotate, double-tap (or Delete) to remove
 - **Booth-style shooting**: press the shutter and it takes 3 photos, each with a 3-2-1 timer, beep, shutter sound and flash, filling a film tray as it goes. Press Space to shoot on a laptop

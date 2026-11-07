@@ -273,14 +273,13 @@
   const FILTERS = [
     {
       name: "Let’s get LIT",
+      mark: "banner", // lettering rule: banner OR wordmark, never both
       swatch: `url(assets/brand/badge-diya.png) center/120% no-repeat, ${C.magenta}`,
       strip: dottedBg(C.magenta),
       frame(c) {
         dottedFrame(c, C.magenta, { t: 60, l: 60, r: 60, b: 330 });
-        const wmW = 290;
-        const wmH = assetHeightFor("wordmark", wmW);
-        drawAsset(c, "wordmark", W / 2, H - 330 + 16 + wmH / 2, wmW);
-        litBannerAt(c, W / 2, H - 330 + 16 + wmH + 18, 540);
+        const bw = 780;
+        litBannerAt(c, W / 2, H - 330 + (330 - litBannerHeight(bw)) / 2, bw);
       },
       deco(c, t, strip) {
         drawAsset(c, "diya-lit", 150, 170, 280, -0.18 + Math.sin(t * 1.6) * 0.03);
@@ -291,6 +290,7 @@
     },
     {
       name: "Gift Wrap",
+      mark: "banner", // lettering rule: banner OR wordmark, never both
       swatch: `linear-gradient(90deg, ${C.khaki} 0 22%, ${C.rose} 22% 34%, ${C.marigold} 34% 48%, ${C.leaf} 48% 62%, ${C.indigo} 62%)`,
       strip(c, w, h) {
         giftPaper(c, w, h);
@@ -310,6 +310,7 @@
     },
     {
       name: "Rangoli",
+      mark: "wordmark", // lettering rule: banner OR wordmark, never both
       swatch: `url(assets/brand/badge-rangoli-green.png) center/110% no-repeat, ${C.indigo}`,
       strip: dottedBg(C.indigo),
       frame(c) {
@@ -328,6 +329,7 @@
     },
     {
       name: "Snack Attack",
+      mark: "banner", // lettering rule: banner OR wordmark, never both
       swatch: `url(assets/brand/badge-jalebi-green.png) center/110% no-repeat, ${C.leaf}`,
       strip: dottedBg(C.leaf),
       frame(c) {
@@ -343,6 +345,7 @@
     },
     {
       name: "Festival of Lights",
+      mark: "banner", // lettering rule: banner OR wordmark, never both
       swatch: `url(assets/brand/diya-lit.png) center/80% no-repeat, radial-gradient(${C.gold}, ${C.marigold})`,
       strip(c, w, h) {
         const g = c.createLinearGradient(0, 0, 0, h);
@@ -385,6 +388,7 @@
     },
     {
       name: "Sparklers",
+      mark: "wordmark", // lettering rule: banner OR wordmark, never both
       swatch: `url(assets/brand/sparkler.png) center/70% no-repeat, ${C.ink}`,
       strip: dottedBg(C.ink, "rgba(247,200,105,.45)"),
       frame(c) {
@@ -400,6 +404,7 @@
     },
     {
       name: "Clean",
+      mark: "wordmark", // lettering rule: banner OR wordmark, never both
       swatch: `url(assets/brand/wordmark.png) center/85% no-repeat, ${C.paper}`,
       strip: dottedBg(C.paper, "rgba(54,54,232,.18)"),
       frame(c) {
@@ -452,6 +457,8 @@
   glowCanvas.height = Math.round(H / 10);
   const glowCtx = glowCanvas.getContext("2d");
 
+  const CAN_FILTER = typeof ctx.filter === "string";
+
   function filmLook(c) {
     // Soft haze/bloom: a tiny blurred copy of the photo screened back on top
     glowCtx.imageSmoothingEnabled = true;
@@ -460,25 +467,21 @@
     c.save();
     c.imageSmoothingEnabled = true;
     c.globalCompositeOperation = "screen";
-    c.globalAlpha = 0.32;
+    c.globalAlpha = 0.18;
     c.drawImage(glowCanvas, 0, 0, W, H);
     c.globalAlpha = 1;
 
     // Faded, milky shadows
-    c.fillStyle = "rgb(58,42,40)";
+    c.fillStyle = "rgb(36,22,16)";
     c.fillRect(0, 0, W, H);
 
     // Warm red-orange cast through the skin tones
     c.globalCompositeOperation = "soft-light";
-    c.fillStyle = "rgba(255,120,70,.5)";
-    c.fillRect(0, 0, W, H);
-
-    // Slightly cooler, greyer highlights so it doesn't go fully orange
-    c.globalCompositeOperation = "multiply";
-    c.fillStyle = "rgb(250,240,238)";
+    c.fillStyle = "rgba(255,112,50,.55)";
     c.fillRect(0, 0, W, H);
 
     // Gentle vignette
+    c.globalCompositeOperation = "multiply";
     const v = c.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.8);
     v.addColorStop(0, "rgba(255,255,255,0)");
     v.addColorStop(1, "rgba(110,80,75,.55)");
@@ -487,7 +490,7 @@
 
     // Visible grain, drawn a bit larger than 1:1 so it survives on a phone screen
     c.globalCompositeOperation = "overlay";
-    c.globalAlpha = 0.42;
+    c.globalAlpha = 0.32;
     const tile = grainTile();
     const scale = 1.6, step = tile.width * scale;
     const ox = -Math.random() * step, oy = -Math.random() * step;
@@ -534,7 +537,19 @@
     c.fillStyle = C.ink;
     c.fillRect(0, 0, W, H);
     if (state.source) {
+      // Punch the colour up first so the film fade doesn't leave it looking grey.
+      if (CAN_FILTER) c.filter = "saturate(1.6) contrast(1.06)";
       drawCover(c, state.source, 0, 0, W, H, state.mirror);
+      if (CAN_FILTER) {
+        c.filter = "none";
+      } else {
+        // Browsers without canvas filters: overlay the photo on itself for more colour
+        c.save();
+        c.globalCompositeOperation = "overlay";
+        c.globalAlpha = 0.45;
+        c.drawImage(c.canvas, 0, 0);
+        c.restore();
+      }
       filmLook(c);
     }
     // Strip shots get just the props; the strip itself is the frame.
@@ -630,7 +645,7 @@
 
   function buildStrip(shots) {
     // Even "film" borders: the same width around and between every photo.
-    const sw = 600, sh = 750, m = 30, footer = 280;
+    const sw = 600, sh = 750, m = 30, footer = 200;
     const f = FILTERS[state.filter];
     const c = document.createElement("canvas");
     c.width = sw + m * 2;
@@ -655,10 +670,14 @@
       x.restore();
     });
     const fy = c.height - footer;
-    const wmW = 270;
-    const wmH = assetHeightFor("wordmark", wmW);
-    drawAsset(x, "wordmark", c.width / 2, fy + 10 + wmH / 2, wmW);
-    litBannerAt(x, c.width / 2, fy + 10 + wmH + 16, 460);
+    // One mark only: the filter's banner or the wordmark
+    if (f.mark === "banner") {
+      const bw = 560;
+      litBannerAt(x, c.width / 2, fy + (footer - m - litBannerHeight(bw)) / 2, bw);
+    } else {
+      const wmW = 340;
+      drawAsset(x, "wordmark", c.width / 2, fy + (footer - m) / 2, wmW);
+    }
     return c;
   }
 
@@ -821,6 +840,8 @@
     inner.style.setProperty("--print-w", `${w}px`);
     inner.style.setProperty("--print-h", `${Math.round(w * ratio) + 12}px`);
 
+    // The printer wears the same mark as the strip it prints
+    $("printer-mark").src = FILTERS[state.filter].mark === "banner" ? "assets/brand/lets-get-lit.png" : "assets/brand/wordmark.png";
     const pic = $("result-img");
     const print = $("print");
     const status = $("develop-status");
@@ -851,7 +872,7 @@
     await sleep(2600);
     if (run !== printRun) return;
 
-    status.innerHTML = '<img src="assets/brand/lets-get-lit.png" alt="Lets get LIT!" class="status-banner" />';
+    status.textContent = "Ready!";
     actions.classList.remove("waiting");
   }
 
