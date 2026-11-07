@@ -5,14 +5,15 @@
 <title>Diwali Party Photo Booth Poster</title>
 <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet" />
 <style>
-  /* US Letter, full bleed. Scales cleanly to 11x17, 18x24 (same proportions are close enough to print "fit to page"). */
+  /* US Letter by default; open with ?size=a4 for A4. Full bleed. */
   @page { size: 8.5in 11in; margin: 0; }
+  :root { --pw: 8.5in; --ph: 11in; }
   :root {
     --marigold: #FF7011; --magenta: #E836DC; --indigo: #3636E8; --leaf: #328532;
     --gold: #F7C869; --rose: #FFB0FA; --ink: #14124a; --paper: #fffaf2;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { width: 8.5in; height: 11in; }
+  html, body { width: var(--pw); height: var(--ph); }
   body {
     position: relative; overflow: hidden;
     font-family: "Outfit", sans-serif; color: var(--paper);
@@ -71,6 +72,16 @@
   .samosa { left: 0.25in; top: 0.35in; width: 1.35in; transform: rotate(-12deg); }
   .sparkler { right: 0.3in; top: 0.3in; width: 1.1in; transform: rotate(16deg); }
 </style>
+<script>
+  // A4 variant: same design on a 210 x 297 mm page
+  if (new URLSearchParams(location.search).get("size") === "a4") {
+    document.documentElement.style.setProperty("--pw", "210mm");
+    document.documentElement.style.setProperty("--ph", "297mm");
+    const st = document.createElement("style");
+    st.textContent = "@page { size: 210mm 297mm; margin: 0; }";
+    document.head.appendChild(st);
+  }
+</script>
 </head>
 <body>
   <header class="block">

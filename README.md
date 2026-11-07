@@ -54,8 +54,11 @@ and a `draw(ctx, t)` function that paints over the 1080×1350 photo (`t` is time
 
 ## Poster
 
-`poster/` has a printable US Letter poster with a QR code to the booth:
-`diwali-photo-booth-poster.pdf` (print this, full bleed) and a `.png` for sharing.
+`poster/` has a printable poster with a QR code to the booth, in two sizes:
+- A4: `diwali-photo-booth-poster-a4.pdf` (and `.png`)
+- US Letter: `diwali-photo-booth-poster.pdf` (and `.png`)
+
+Print the PDF full bleed; the PNG is for sharing. Open `poster.html?size=a4` for the A4 layout.
 `poster.html` is the source. To regenerate the QR code for a different URL:
 `python3 -c "import segno; segno.make('URL', error='h').save('poster/qr.svg', scale=10, border=0, dark='#14124a', light=None)"`
 then print `poster.html` from a browser with background graphics on.
