@@ -524,6 +524,7 @@
     const dl = $("download-btn");
     dl.href = url;
     dl.download = name;
+    dl.onclick = (e) => saveViaHost(e, blob, name);
 
     const shareBtn = $("share-btn");
     const file = new File([blob], name, { type: "image/png" });
@@ -535,6 +536,18 @@
       } catch (_) { /* user cancelled */ }
     };
     show("result");
+  }
+
+  // When running inside a claude.ai artifact, plain <a download> links are blocked,
+  // so hand the file to the host's save dialog. Elsewhere the normal link is used.
+  let hostDownloads = null;
+  if (window.claude?.use) {
+    window.claude.use("downloads").then((d) => (hostDownloads = d)).catch(() => {});
+  }
+  function saveViaHost(e, blob, name) {
+    if (!hostDownloads) return;
+    e.preventDefault();
+    hostDownloads.save({ filename: name, data: blob }).catch(() => {});
   }
 
   // ---------- Stickers ----------
@@ -713,6 +726,7 @@
       a.href = p.url;
       a.download = p.name;
       a.title = "Download";
+      a.addEventListener("click", (e) => saveViaHost(e, p.blob, p.name));
       a.innerHTML = `<img alt="Diwali Party photo" />`;
       a.firstElementChild.src = p.url;
       grid.appendChild(a);
