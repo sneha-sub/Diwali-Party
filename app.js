@@ -195,21 +195,34 @@
   }
 
   // ---------- Filters ----------
-  // Each filter draws on top of the photo. `t` is time in seconds for animation.
+  // Each filter has:
+  //   frame(c, t)  border + lettering, used for single photos only
+  //   deco(c, t)   props drawn over the photo (on single photos and on every strip shot)
+  //   strip(c, w, h)  background of the printed strip
+  //   ink          colours for the strip's footer lettering
+  // `t` is time in seconds, for animation.
+  const dottedBg = (color, dot = "rgba(255,255,255,.5)") => (c, w, h) => {
+    c.fillStyle = color;
+    c.fillRect(0, 0, w, h);
+    dots(c, 0, 0, w, h, 24, 3, dot);
+  };
+
   const FILTERS = [
     {
       name: "Let’s get LIT",
       swatch: `url(assets/brand/badge-diya.png) center/120% no-repeat, ${C.magenta}`,
-      draw(c, t) {
-        const inset = { t: 60, l: 60, r: 60, b: 330 };
-        dottedFrame(c, C.magenta, inset);
+      strip: dottedBg(C.magenta),
+      ink: { color: C.gold, shadow: C.indigo },
+      frame(c) {
+        dottedFrame(c, C.magenta, { t: 60, l: 60, r: 60, b: 330 });
         const wmW = 350;
         const wmH = assetHeightFor("wordmark", wmW);
         drawAsset(c, "wordmark", W / 2, H - 330 + 22 + wmH / 2, wmW);
         text(c, "Let’s get LIT!", W / 2, H - 42, { size: 70, color: C.rose, shadow: C.indigo });
-        // Lit diya peeking in at the top-left, sparkler fizzing on the right
+      },
+      deco(c, t, strip) {
         drawAsset(c, "diya-lit", 150, 170, 280, -0.18 + Math.sin(t * 1.6) * 0.03);
-        const sx = W - 140, sy = H - 520;
+        const sx = W - 140, sy = strip ? H - 220 : H - 520;
         drawAsset(c, "sparkler", sx, sy, 300, 0.32);
         sparkBurst(c, sx - 30, sy - 90, 150, t, [C.gold, C.rose, "#fff"]);
       },
@@ -217,22 +230,16 @@
     {
       name: "Gift Wrap",
       swatch: `linear-gradient(90deg, ${C.khaki} 0 22%, ${C.rose} 22% 34%, ${C.marigold} 34% 48%, ${C.leaf} 48% 62%, ${C.indigo} 62%)`,
-      draw(c) {
-        const inset = { t: 80, l: 70, r: 70, b: 270 };
+      strip(c, w, h) {
+        giftPaper(c, w, h);
+      },
+      ink: { color: C.paper, shadow: C.ink },
+      frame(c) {
         c.save();
-        framePath(c, inset);
+        framePath(c, { t: 80, l: 70, r: 70, b: 270 });
         c.clip("evenodd");
-        // Colour-blocked paper, like the wordmark gift box
-        const blocks = [[C.khaki, 0.3], [C.rose, 0.08], [C.marigold, 0.1], [C.leaf, 0.12], [C.indigo, 0.4]];
-        let x = 0;
-        blocks.forEach(([col, w]) => { c.fillStyle = col; c.fillRect(x, 0, W * w + 1, H); x += W * w; });
-        // Gold ribbon, both directions
-        c.fillStyle = C.gold;
-        c.fillRect(W * 0.38 - 22, 0, 44, H);
-        c.fillRect(0, H * 0.42 - 22, W, 44);
+        giftPaper(c, W, H);
         c.restore();
-        // Bow on the top ribbon
-        bow(c, W * 0.38, 40, 1.15);
         text(c, "Happy Diwali!", W / 2, H - 150, { size: 104, color: C.paper, shadow: C.ink });
         c.save();
         c.beginPath();
@@ -242,46 +249,65 @@
         c.restore();
         text(c, "DIWALI PARTY · 2026", W / 2, H - 67, { font: SANS, weight: 800, size: 36, color: C.gold });
       },
+      deco(c) {
+        bow(c, W * 0.38, 40, 1.15);
+      },
     },
     {
       name: "Rangoli",
       swatch: `url(assets/brand/badge-rangoli-green.png) center/110% no-repeat, ${C.indigo}`,
-      draw(c, t) {
-        const inset = { t: 70, l: 70, r: 70, b: 270 };
-        dottedFrame(c, C.indigo, inset);
+      strip: dottedBg(C.indigo),
+      ink: { color: C.gold, shadow: C.magenta },
+      frame(c) {
+        dottedFrame(c, C.indigo, { t: 70, l: 70, r: 70, b: 270 });
+        text(c, "Shubh Deepavali", W / 2, H - 150, { size: 84, color: C.gold, shadow: C.magenta, maxWidth: W - 520 });
+        text(c, "DIWALI PARTY · 2026", W / 2, H - 82, { font: SANS, weight: 800, size: 34, color: C.rose, maxWidth: W - 520 });
+      },
+      deco(c, t) {
         const s = 250, spin = t * 0.25;
         drawAsset(c, "badge-rangoli", 95, 95, s, spin);
         drawAsset(c, "badge-rangoli-green", W - 95, 95, s, -spin);
         drawAsset(c, "badge-rangoli-green", 110, H - 140, s, -spin);
         drawAsset(c, "badge-rangoli", W - 110, H - 140, s, spin);
-        text(c, "Shubh Deepavali", W / 2, H - 150, { size: 84, color: C.gold, shadow: C.magenta, maxWidth: W - 520 });
-        text(c, "DIWALI PARTY · 2026", W / 2, H - 82, { font: SANS, weight: 800, size: 34, color: C.rose, maxWidth: W - 520 });
       },
     },
     {
       name: "Snack Attack",
       swatch: `url(assets/brand/badge-jalebi-green.png) center/110% no-repeat, ${C.leaf}`,
-      draw(c, t) {
-        const inset = { t: 60, l: 60, r: 60, b: 290 };
-        dottedFrame(c, C.leaf, inset);
-        drawAsset(c, "jalebi", W - 150, 160, 310, t * 0.5);
-        drawAsset(c, "badge-jalebi", 120, 120, 190, -0.2);
-        drawAsset(c, "samosa", 175, H - 220, 330, -0.15 + Math.sin(t * 2) * 0.04);
+      strip: dottedBg(C.leaf),
+      ink: { color: C.gold, shadow: C.ink },
+      frame(c) {
+        dottedFrame(c, C.leaf, { t: 60, l: 60, r: 60, b: 290 });
         text(c, "Sweet & Savory", W * 0.62, H - 150, { size: 80, color: C.gold, shadow: C.ink, maxWidth: 640 });
         text(c, "jalebi · samosa · repeat", W * 0.62, H - 82, { font: SANS, weight: 600, size: 36, color: C.paper, maxWidth: 640 });
+      },
+      deco(c, t, strip) {
+        drawAsset(c, "jalebi", W - 150, 160, 310, t * 0.5);
+        drawAsset(c, "badge-jalebi", 120, 120, 190, -0.2);
+        drawAsset(c, "samosa", 175, strip ? H - 170 : H - 220, 330, -0.15 + Math.sin(t * 2) * 0.04);
       },
     },
     {
       name: "Festival of Lights",
       swatch: `url(assets/brand/diya-lit.png) center/80% no-repeat, radial-gradient(${C.gold}, ${C.marigold})`,
-      draw(c, t) {
-        // Warm glow vignette
+      strip(c, w, h) {
+        const g = c.createLinearGradient(0, 0, 0, h);
+        g.addColorStop(0, C.marigold);
+        g.addColorStop(1, C.magenta);
+        c.fillStyle = g;
+        c.fillRect(0, 0, w, h);
+        dots(c, 0, 0, w, h, 24, 3, "rgba(255,255,255,.35)");
+      },
+      ink: { color: C.gold, shadow: C.indigo },
+      frame(c) {
+        text(c, "Let’s get LIT!", W / 2, 150, { size: 120, color: C.gold, shadow: C.magenta });
+      },
+      deco(c, t) {
         const g = c.createRadialGradient(W / 2, H * 0.45, H * 0.25, W / 2, H * 0.5, H * 0.8);
         g.addColorStop(0, "rgba(255,112,17,0)");
         g.addColorStop(1, "rgba(232,54,220,.55)");
         c.fillStyle = g;
         c.fillRect(0, 0, W, H);
-        // Floating bokeh lights drifting upward
         glowParticles.forEach((p) => {
           const y = (((p.y - t * 0.04 * p.sp) % 1) + 1) % 1;
           const x = p.x * W + Math.sin(t * p.sp + p.ph) * 20;
@@ -296,8 +322,6 @@
           c.arc(x, y * H, r, 0, Math.PI * 2);
           c.fill();
         });
-        text(c, "Let’s get LIT!", W / 2, 150, { size: 120, color: C.gold, shadow: C.magenta });
-        // A row of diyas along the bottom
         const names = ["badge-diya", "badge-diya-blue", "diya-2026", "badge-diya-blue", "badge-diya"];
         names.forEach((n, i) => {
           const x = W * (0.1 + i * 0.2);
@@ -309,24 +333,91 @@
     {
       name: "Sparklers",
       swatch: `url(assets/brand/sparkler.png) center/70% no-repeat, ${C.ink}`,
-      draw(c, t) {
+      strip: dottedBg(C.ink, "rgba(247,200,105,.45)"),
+      ink: { color: C.gold, shadow: C.magenta },
+      frame(c) {
+        const wmW = 360;
+        drawAsset(c, "wordmark", W / 2, H - 40 - assetHeightFor("wordmark", wmW) / 2, wmW, -0.03);
+      },
+      deco(c, t) {
         drawAsset(c, "sparkler", 140, 230, 330, -0.35);
         sparkBurst(c, 150, 120, 160, t, [C.gold, "#fff", C.rose]);
         drawAsset(c, "sparkler", W - 140, 230, 330, 0.35);
         sparkBurst(c, W - 150, 120, 160, t + 0.5, [C.gold, C.marigold, "#fff"]);
-        const wmW = 360;
-        drawAsset(c, "wordmark", W / 2, H - 40 - assetHeightFor("wordmark", wmW) / 2, wmW, -0.03);
       },
     },
     {
       name: "Clean",
       swatch: `url(assets/brand/wordmark.png) center/85% no-repeat, ${C.paper}`,
-      draw(c) {
+      strip: dottedBg(C.paper, "rgba(54,54,232,.18)"),
+      ink: { color: C.indigo, shadow: C.rose },
+      frame(c) {
         const wmW = 260;
         drawAsset(c, "wordmark", W - 40 - wmW / 2, H - 40 - assetHeightFor("wordmark", wmW) / 2, wmW);
       },
+      deco() {},
     },
   ];
+
+  /** Colour-blocked wrapping paper with a gold ribbon, like the wordmark gift box. */
+  function giftPaper(c, w, h) {
+    const blocks = [[C.khaki, 0.3], [C.rose, 0.08], [C.marigold, 0.1], [C.leaf, 0.12], [C.indigo, 0.4]];
+    let x = 0;
+    blocks.forEach(([col, f]) => { c.fillStyle = col; c.fillRect(x, 0, w * f + 1, h); x += w * f; });
+    c.fillStyle = C.gold;
+    c.fillRect(w * 0.38 - w * 0.02, 0, w * 0.04, h);
+    c.fillRect(0, h * 0.42 - w * 0.02, w, w * 0.04);
+  }
+
+  // ---------- Film look ----------
+  // A gentle instant-film treatment: faded blacks, warm tone, soft vignette and fine grain.
+  // Done with blend modes (not ctx.filter) so it also works in Safari.
+  let grainPattern = null;
+  function grain() {
+    if (grainPattern) return grainPattern;
+    const g = document.createElement("canvas");
+    g.width = g.height = 256;
+    const gx = g.getContext("2d");
+    const d = gx.createImageData(256, 256);
+    for (let i = 0; i < d.data.length; i += 4) {
+      const v = 110 + Math.random() * 36;
+      d.data[i] = d.data[i + 1] = d.data[i + 2] = v;
+      d.data[i + 3] = 255;
+    }
+    gx.putImageData(d, 0, 0);
+    grainPattern = ctx.createPattern(g, "repeat");
+    return grainPattern;
+  }
+
+  function filmLook(c) {
+    c.save();
+    // Lift the blacks so shadows look faded, like instant film
+    c.globalCompositeOperation = "screen";
+    c.fillStyle = "rgb(34,26,22)";
+    c.fillRect(0, 0, W, H);
+    // Warm, slightly creamy tone
+    c.globalCompositeOperation = "soft-light";
+    c.fillStyle = "rgba(255,186,120,.35)";
+    c.fillRect(0, 0, W, H);
+    // Ease off the saturation a touch
+    c.globalCompositeOperation = "saturation";
+    c.fillStyle = "rgba(128,128,128,.14)";
+    c.fillRect(0, 0, W, H);
+    // Soft vignette
+    c.globalCompositeOperation = "multiply";
+    const v = c.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.78);
+    v.addColorStop(0, "rgba(255,255,255,0)");
+    v.addColorStop(1, "rgba(120,90,80,.45)");
+    c.fillStyle = v;
+    c.fillRect(0, 0, W, H);
+    // Fine grain
+    c.globalCompositeOperation = "overlay";
+    c.globalAlpha = 0.18;
+    c.fillStyle = grain();
+    c.translate((Math.random() * 256) | 0, (Math.random() * 256) | 0);
+    c.fillRect(-256, -256, W + 256, H + 256);
+    c.restore();
+  }
 
   function bow(c, x, y, s) {
     c.save();
@@ -364,8 +455,15 @@
     const t = (performance.now() - t0) / 1000;
     c.fillStyle = C.ink;
     c.fillRect(0, 0, W, H);
-    if (state.source) drawCover(c, state.source, 0, 0, W, H, state.mirror);
-    FILTERS[state.filter].draw(c, t);
+    if (state.source) {
+      drawCover(c, state.source, 0, 0, W, H, state.mirror);
+      filmLook(c);
+    }
+    // Strip shots get just the props; the strip itself is the frame.
+    const f = FILTERS[state.filter];
+    const strip = state.mode === "strip";
+    if (!strip) f.frame(c, t);
+    f.deco(c, t, strip);
     state.stickers.forEach((s) => {
       drawAsset(c, s.name, s.x, s.y, s.size, s.rot);
       if (!opts.clean && s === state.selected) {
@@ -453,25 +551,36 @@
   }
 
   function buildStrip(shots) {
-    const sw = 600, sh = 750, m = 40, gap = 26, footer = 280;
+    // Even "film" borders: the same width around and between every photo.
+    const sw = 600, sh = 750, m = 30, footer = 250;
+    const f = FILTERS[state.filter];
     const c = document.createElement("canvas");
     c.width = sw + m * 2;
-    c.height = m + shots.length * sh + (shots.length - 1) * gap + footer;
+    c.height = m + shots.length * sh + (shots.length - 1) * m + footer;
     const x = c.getContext("2d");
-    x.fillStyle = C.magenta;
-    x.fillRect(0, 0, c.width, c.height);
-    dots(x, 0, 0, c.width, c.height, 24, 3, "rgba(255,255,255,.5)");
+    f.strip(x, c.width, c.height);
     shots.forEach((s, i) => {
-      const y = m + i * (sh + gap);
-      x.fillStyle = C.paper;
-      x.fillRect(m - 8, y - 8, sw + 16, sh + 16);
+      const y = m + i * (sh + m);
+      x.save();
+      x.beginPath();
+      roundRectPath(x, m, y, sw, sh, 6);
+      x.clip();
       x.drawImage(s, m, y, sw, sh);
+      x.restore();
+      // A thin dark edge so each photo reads like a frame on the film
+      x.save();
+      x.beginPath();
+      roundRectPath(x, m + 1, y + 1, sw - 2, sh - 2, 6);
+      x.strokeStyle = "rgba(0,0,0,.28)";
+      x.lineWidth = 2;
+      x.stroke();
+      x.restore();
     });
     const fy = c.height - footer;
     const wmW = 300;
     const wmH = assetHeightFor("wordmark", wmW);
-    drawAsset(x, "wordmark", c.width / 2, fy + 28 + wmH / 2, wmW);
-    text(x, "Let’s get LIT!", c.width / 2, c.height - 36, { size: 58, color: C.gold, shadow: C.indigo, maxWidth: sw });
+    drawAsset(x, "wordmark", c.width / 2, fy + 22 + wmH / 2, wmW);
+    text(x, "Let’s get LIT!", c.width / 2, c.height - 34, { size: 58, color: f.ink.color, shadow: f.ink.shadow, maxWidth: sw });
     return c;
   }
 
@@ -955,6 +1064,6 @@
   }
 
   // Expose a tiny hook for automated checks.
-  window.__booth = { state, FILTERS, render, snapshot };
+  window.__booth = { state, FILTERS, render, snapshot, buildStrip };
   boot();
 })();

@@ -19,10 +19,11 @@ Guests open the booth, pick a filter, add stickers, and strike a pose. **Let's g
   | Festival of Lights | Warm glow, floating lights, a row of diyas |
   | Sparklers | Two sparklers with animated sparks |
   | Clean | Just a small wordmark in the corner |
+- **Film look**: every photo gets a subtle instant-film treatment (faded blacks, warm tone, soft vignette, fine grain)
 - **Stickers**: tap to add any brand illustration. Drag to move, pinch (or scroll) to resize,
   two-finger twist (or shift+scroll) to rotate, double-tap (or Delete) to remove
 - **Booth-style shooting**: press the shutter and it takes 3 photos, each with a 3-2-1 timer, beep, shutter sound and flash, filling a film tray as it goes. Press Space to shoot on a laptop
-- **Printing**: the strip feeds out of a brand-styled booth printer and develops from a pale blank into full colour. Single mode prints one photo the same way
+- **Printing**: the strip feeds out of a brand-styled booth printer and develops from a pale blank into full colour. Photos sit straight on the strip, which takes the filter's colours, with the wordmark and "Let's get LIT!" once at the bottom. Single mode prints one framed photo the same way
 - **Save to Camera Roll**: opens the phone share sheet (on iPhone, "Save Image" puts it in Photos); downloads on desktop. Plus a gallery of this visit's photos
 - **Use a photo** if the camera isn't available
 
