@@ -194,6 +194,69 @@
     });
   }
 
+  // ---------- "Lets get LIT!" banner ----------
+  // Colour-blocked lockup from the brand, drawn in code so it stays crisp at any size.
+  // Proportions measured from the brand artwork (666 x 138).
+  const SAGE = "#7CA87C";
+  const BANNER_RATIO = 138 / 666;
+  function litBannerHeight(w) { return w * BANNER_RATIO; }
+
+  /** Draw the banner with its top-left corner at (x, y), `w` wide. */
+  function drawLitBanner(c, x, y, w) {
+    const h = w * BANNER_RATIO;
+    const u = w / 666; // one unit of the original artwork
+    const blocks = [
+      [0, 186, C.rose, "Lets", C.magenta],
+      [186, 187, SAGE, "get", C.rose],
+      [373, 180, C.indigo, "LIT!", C.rose],
+      [553, 113, C.marigold, null, null],
+    ];
+    c.save();
+    c.translate(x, y);
+    c.textAlign = "center";
+    c.textBaseline = "alphabetic";
+    c.font = `800 ${Math.round(58 * u)}px ${SANS}`;
+    blocks.forEach(([bx, bw, bg, word, fg]) => {
+      c.fillStyle = bg;
+      c.fillRect(bx * u, 0, bw * u + 0.5, h);
+      if (word) {
+        c.fillStyle = fg;
+        c.fillText(word, (bx + bw / 2) * u, 90 * u);
+      }
+    });
+    // Sparkler: magenta stick, gold starburst, little pink sparks
+    const sx = 611 * u, sy = 52 * u;
+    c.fillStyle = C.magenta;
+    c.fillRect(613 * u, 62 * u, 4.5 * u, h - 62 * u);
+    c.fillStyle = C.gold;
+    for (let i = 0; i < 8; i++) {
+      c.save();
+      c.translate(sx, sy);
+      c.rotate((i * Math.PI) / 4 + 0.2);
+      c.fillRect(-7 * u, -34 * u, 14 * u, 34 * u);
+      c.restore();
+    }
+    c.beginPath();
+    c.arc(sx, sy, 14 * u, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = C.rose;
+    [[568, 30, 0.4], [654, 34, -0.6], [566, 74, 2.4], [656, 72, -2.2], [604, 12, 3.3]].forEach(([tx, ty, r]) => {
+      c.save();
+      c.translate(tx * u, ty * u);
+      c.rotate(r);
+      c.beginPath();
+      c.moveTo(0, -6 * u);
+      c.lineTo(5 * u, 4 * u);
+      c.lineTo(-5 * u, 4 * u);
+      c.closePath();
+      c.fill();
+      c.restore();
+    });
+    c.restore();
+  }
+  /** Same, centred horizontally on cx with its top at y. */
+  const litBannerAt = (c, cx, y, w) => drawLitBanner(c, cx - w / 2, y, w);
+
   // ---------- Filters ----------
   // Each filter has:
   //   frame(c, t)  border + lettering, used for single photos only
@@ -212,13 +275,12 @@
       name: "Let’s get LIT",
       swatch: `url(assets/brand/badge-diya.png) center/120% no-repeat, ${C.magenta}`,
       strip: dottedBg(C.magenta),
-      ink: { color: C.gold, shadow: C.indigo },
       frame(c) {
         dottedFrame(c, C.magenta, { t: 60, l: 60, r: 60, b: 330 });
-        const wmW = 350;
+        const wmW = 290;
         const wmH = assetHeightFor("wordmark", wmW);
-        drawAsset(c, "wordmark", W / 2, H - 330 + 22 + wmH / 2, wmW);
-        text(c, "Let’s get LIT!", W / 2, H - 42, { size: 70, color: C.rose, shadow: C.indigo });
+        drawAsset(c, "wordmark", W / 2, H - 330 + 16 + wmH / 2, wmW);
+        litBannerAt(c, W / 2, H - 330 + 16 + wmH + 18, 540);
       },
       deco(c, t, strip) {
         drawAsset(c, "diya-lit", 150, 170, 280, -0.18 + Math.sin(t * 1.6) * 0.03);
@@ -233,21 +295,14 @@
       strip(c, w, h) {
         giftPaper(c, w, h);
       },
-      ink: { color: C.paper, shadow: C.ink },
       frame(c) {
         c.save();
         framePath(c, { t: 80, l: 70, r: 70, b: 270 });
         c.clip("evenodd");
         giftPaper(c, W, H);
         c.restore();
-        text(c, "Happy Diwali!", W / 2, H - 150, { size: 104, color: C.paper, shadow: C.ink });
-        c.save();
-        c.beginPath();
-        roundRectPath(c, W / 2 - 230, H - 112, 460, 62, 31);
-        c.fillStyle = C.ink;
-        c.fill();
-        c.restore();
-        text(c, "DIWALI PARTY · 2026", W / 2, H - 67, { font: SANS, weight: 800, size: 36, color: C.gold });
+        const bw = 760;
+        litBannerAt(c, W / 2, H - 270 + (270 - litBannerHeight(bw)) / 2, bw);
       },
       deco(c) {
         bow(c, W * 0.38, 40, 1.15);
@@ -257,11 +312,11 @@
       name: "Rangoli",
       swatch: `url(assets/brand/badge-rangoli-green.png) center/110% no-repeat, ${C.indigo}`,
       strip: dottedBg(C.indigo),
-      ink: { color: C.gold, shadow: C.magenta },
       frame(c) {
         dottedFrame(c, C.indigo, { t: 70, l: 70, r: 70, b: 270 });
-        text(c, "Shubh Deepavali", W / 2, H - 150, { size: 84, color: C.gold, shadow: C.magenta, maxWidth: W - 520 });
-        text(c, "DIWALI PARTY · 2026", W / 2, H - 82, { font: SANS, weight: 800, size: 34, color: C.rose, maxWidth: W - 520 });
+        const wmW = 420;
+        const wmH = assetHeightFor("wordmark", wmW);
+        drawAsset(c, "wordmark", W / 2, H - 270 + (270 - wmH) / 2 + wmH / 2, wmW);
       },
       deco(c, t) {
         const s = 250, spin = t * 0.25;
@@ -275,11 +330,10 @@
       name: "Snack Attack",
       swatch: `url(assets/brand/badge-jalebi-green.png) center/110% no-repeat, ${C.leaf}`,
       strip: dottedBg(C.leaf),
-      ink: { color: C.gold, shadow: C.ink },
       frame(c) {
         dottedFrame(c, C.leaf, { t: 60, l: 60, r: 60, b: 290 });
-        text(c, "Sweet & Savory", W * 0.62, H - 150, { size: 80, color: C.gold, shadow: C.ink, maxWidth: 640 });
-        text(c, "jalebi · samosa · repeat", W * 0.62, H - 82, { font: SANS, weight: 600, size: 36, color: C.paper, maxWidth: 640 });
+        const bw = 620;
+        litBannerAt(c, W * 0.63, H - 290 + (290 - litBannerHeight(bw)) / 2, bw);
       },
       deco(c, t, strip) {
         drawAsset(c, "jalebi", W - 150, 160, 310, t * 0.5);
@@ -298,9 +352,8 @@
         c.fillRect(0, 0, w, h);
         dots(c, 0, 0, w, h, 24, 3, "rgba(255,255,255,.35)");
       },
-      ink: { color: C.gold, shadow: C.indigo },
       frame(c) {
-        text(c, "Let’s get LIT!", W / 2, 150, { size: 120, color: C.gold, shadow: C.magenta });
+        litBannerAt(c, W / 2, 50, 700);
       },
       deco(c, t) {
         const g = c.createRadialGradient(W / 2, H * 0.45, H * 0.25, W / 2, H * 0.5, H * 0.8);
@@ -334,7 +387,6 @@
       name: "Sparklers",
       swatch: `url(assets/brand/sparkler.png) center/70% no-repeat, ${C.ink}`,
       strip: dottedBg(C.ink, "rgba(247,200,105,.45)"),
-      ink: { color: C.gold, shadow: C.magenta },
       frame(c) {
         const wmW = 360;
         drawAsset(c, "wordmark", W / 2, H - 40 - assetHeightFor("wordmark", wmW) / 2, wmW, -0.03);
@@ -350,7 +402,6 @@
       name: "Clean",
       swatch: `url(assets/brand/wordmark.png) center/85% no-repeat, ${C.paper}`,
       strip: dottedBg(C.paper, "rgba(54,54,232,.18)"),
-      ink: { color: C.indigo, shadow: C.rose },
       frame(c) {
         const wmW = 260;
         drawAsset(c, "wordmark", W - 40 - wmW / 2, H - 40 - assetHeightFor("wordmark", wmW) / 2, wmW);
@@ -370,52 +421,79 @@
   }
 
   // ---------- Film look ----------
-  // A gentle instant-film treatment: faded blacks, warm tone, soft vignette and fine grain.
-  // Done with blend modes (not ctx.filter) so it also works in Safari.
-  let grainPattern = null;
-  function grain() {
-    if (grainPattern) return grainPattern;
-    const g = document.createElement("canvas");
-    g.width = g.height = 256;
-    const gx = g.getContext("2d");
-    const d = gx.createImageData(256, 256);
-    for (let i = 0; i < d.data.length; i += 4) {
-      const v = 110 + Math.random() * 36;
-      d.data[i] = d.data[i + 1] = d.data[i + 2] = v;
-      d.data[i + 3] = 255;
+  // Warm, hazy instant-film look: soft glow, faded shadows, warm skin tones,
+  // gentle vignette and visible grain. Colour stays in. Done with blend modes
+  // (not ctx.filter) so it also works in Safari.
+  const grainTiles = [];
+  function grainTile() {
+    if (!grainTiles.length) {
+      for (let k = 0; k < 3; k++) {
+        const g = document.createElement("canvas");
+        g.width = g.height = 200;
+        const gx = g.getContext("2d");
+        const d = gx.createImageData(200, 200);
+        for (let i = 0; i < d.data.length; i += 4) {
+          const v = 128 + (Math.random() + Math.random() - 1) * 90;
+          // A little colour in the grain, like film
+          d.data[i] = v + (Math.random() - 0.5) * 24;
+          d.data[i + 1] = v + (Math.random() - 0.5) * 24;
+          d.data[i + 2] = v + (Math.random() - 0.5) * 24;
+          d.data[i + 3] = 255;
+        }
+        gx.putImageData(d, 0, 0);
+        grainTiles.push(g);
+      }
     }
-    gx.putImageData(d, 0, 0);
-    grainPattern = ctx.createPattern(g, "repeat");
-    return grainPattern;
+    return grainTiles[(Math.random() * grainTiles.length) | 0];
   }
 
+  const glowCanvas = document.createElement("canvas");
+  glowCanvas.width = Math.round(W / 10);
+  glowCanvas.height = Math.round(H / 10);
+  const glowCtx = glowCanvas.getContext("2d");
+
   function filmLook(c) {
+    // Soft haze/bloom: a tiny blurred copy of the photo screened back on top
+    glowCtx.imageSmoothingEnabled = true;
+    glowCtx.clearRect(0, 0, glowCanvas.width, glowCanvas.height);
+    glowCtx.drawImage(c.canvas, 0, 0, glowCanvas.width, glowCanvas.height);
     c.save();
-    // Lift the blacks so shadows look faded, like instant film
+    c.imageSmoothingEnabled = true;
     c.globalCompositeOperation = "screen";
-    c.fillStyle = "rgb(34,26,22)";
+    c.globalAlpha = 0.32;
+    c.drawImage(glowCanvas, 0, 0, W, H);
+    c.globalAlpha = 1;
+
+    // Faded, milky shadows
+    c.fillStyle = "rgb(58,42,40)";
     c.fillRect(0, 0, W, H);
-    // Warm, slightly creamy tone
+
+    // Warm red-orange cast through the skin tones
     c.globalCompositeOperation = "soft-light";
-    c.fillStyle = "rgba(255,186,120,.35)";
+    c.fillStyle = "rgba(255,120,70,.5)";
     c.fillRect(0, 0, W, H);
-    // Ease off the saturation a touch
-    c.globalCompositeOperation = "saturation";
-    c.fillStyle = "rgba(128,128,128,.14)";
-    c.fillRect(0, 0, W, H);
-    // Soft vignette
+
+    // Slightly cooler, greyer highlights so it doesn't go fully orange
     c.globalCompositeOperation = "multiply";
-    const v = c.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.78);
+    c.fillStyle = "rgb(250,240,238)";
+    c.fillRect(0, 0, W, H);
+
+    // Gentle vignette
+    const v = c.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.8);
     v.addColorStop(0, "rgba(255,255,255,0)");
-    v.addColorStop(1, "rgba(120,90,80,.45)");
+    v.addColorStop(1, "rgba(110,80,75,.55)");
     c.fillStyle = v;
     c.fillRect(0, 0, W, H);
-    // Fine grain
+
+    // Visible grain, drawn a bit larger than 1:1 so it survives on a phone screen
     c.globalCompositeOperation = "overlay";
-    c.globalAlpha = 0.18;
-    c.fillStyle = grain();
-    c.translate((Math.random() * 256) | 0, (Math.random() * 256) | 0);
-    c.fillRect(-256, -256, W + 256, H + 256);
+    c.globalAlpha = 0.42;
+    const tile = grainTile();
+    const scale = 1.6, step = tile.width * scale;
+    const ox = -Math.random() * step, oy = -Math.random() * step;
+    for (let y = oy; y < H; y += step) {
+      for (let x = ox; x < W; x += step) c.drawImage(tile, x, y, step, step);
+    }
     c.restore();
   }
 
@@ -552,7 +630,7 @@
 
   function buildStrip(shots) {
     // Even "film" borders: the same width around and between every photo.
-    const sw = 600, sh = 750, m = 30, footer = 250;
+    const sw = 600, sh = 750, m = 30, footer = 280;
     const f = FILTERS[state.filter];
     const c = document.createElement("canvas");
     c.width = sw + m * 2;
@@ -577,10 +655,10 @@
       x.restore();
     });
     const fy = c.height - footer;
-    const wmW = 300;
+    const wmW = 270;
     const wmH = assetHeightFor("wordmark", wmW);
-    drawAsset(x, "wordmark", c.width / 2, fy + 22 + wmH / 2, wmW);
-    text(x, "Let’s get LIT!", c.width / 2, c.height - 34, { size: 58, color: f.ink.color, shadow: f.ink.shadow, maxWidth: sw });
+    drawAsset(x, "wordmark", c.width / 2, fy + 10 + wmH / 2, wmW);
+    litBannerAt(x, c.width / 2, fy + 10 + wmH + 16, 460);
     return c;
   }
 
@@ -773,7 +851,7 @@
     await sleep(2600);
     if (run !== printRun) return;
 
-    status.textContent = "Looking LIT! ✨";
+    status.innerHTML = '<img src="assets/brand/lets-get-lit.png" alt="Lets get LIT!" class="status-banner" />';
     actions.classList.remove("waiting");
   }
 
