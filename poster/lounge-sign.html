@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Lounge Booked Sign</title>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet" />
+<style>
+  /* US Letter by default; open with ?size=a4 for A4. Full bleed. */
+  @page { size: 8.5in 11in; margin: 0; }
+  :root {
+    --pw: 8.5in; --ph: 11in;
+    --marigold: #FF7011; --magenta: #E836DC; --indigo: #3636E8; --leaf: #328532;
+    --gold: #F7C869; --rose: #FFB0FA; --ink: #14124a; --paper: #fffaf2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: var(--pw); height: var(--ph); }
+  body {
+    position: relative; overflow: hidden;
+    font-family: "Outfit", sans-serif; color: var(--paper);
+    background-color: var(--magenta);
+    background-image: radial-gradient(rgba(255,255,255,.35) 1.6pt, transparent 1.9pt);
+    background-size: 0.3in 0.3in;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 0.6in;
+  }
+  .wordmark { width: 4.6in; filter: drop-shadow(0 0.07in 0 rgba(0,0,0,.18)); }
+
+  .card {
+    margin-top: 0.55in; width: 100%; background: var(--paper); color: var(--ink);
+    border: 0.08in solid var(--gold); border-radius: 0.3in;
+    padding: 0.5in 0.4in 0.55in; text-align: center;
+    box-shadow: 0 0.1in 0 rgba(0,0,0,.2);
+  }
+  .card h1 {
+    font-family: "Abril Fatface", serif; font-weight: 400; color: var(--indigo);
+    font-size: 66pt; line-height: 1.02;
+  }
+  .card p {
+    margin-top: 0.22in; font-size: 26pt; font-weight: 700; color: var(--ink);
+  }
+  .card p b { color: var(--magenta); font-weight: 800; }
+
+  .badges { display: flex; gap: 0.35in; margin-top: 0.6in; }
+  .badges img { width: 1.25in; height: 1.25in; }
+
+  .deco { position: absolute; }
+  .samosa { left: 0.3in; top: 0.35in; width: 1.35in; transform: rotate(-12deg); }
+  .sparkler { right: 0.35in; top: 0.3in; width: 1.1in; transform: rotate(16deg); }
+  .jalebi { left: 0.35in; bottom: 0.4in; width: 1.2in; transform: rotate(10deg); }
+  .sparkler2 { right: 0.35in; bottom: 0.3in; width: 1.05in; transform: rotate(-18deg); }
+</style>
+<script>
+  // A4 variant: same design on a 210 x 297 mm page
+  if (new URLSearchParams(location.search).get("size") === "a4") {
+    document.documentElement.style.setProperty("--pw", "210mm");
+    document.documentElement.style.setProperty("--ph", "297mm");
+    const st = document.createElement("style");
+    st.textContent = "@page { size: 210mm 297mm; margin: 0; }";
+    document.head.appendChild(st);
+  }
+</script>
+</head>
+<body>
+  <img class="wordmark" src="../assets/brand/wordmark.png" alt="Diwali Party 2026" />
+
+  <div class="card">
+    <h1>Lounge booked</h1>
+    <p>for a <b>private event</b></p>
+  </div>
+
+  <div class="badges" aria-hidden="true">
+    <img src="../assets/brand/badge-diya-blue.png" alt="" />
+    <img src="../assets/brand/badge-jalebi-green.png" alt="" />
+    <img src="../assets/brand/badge-rangoli.png" alt="" />
+  </div>
+
+  <img class="deco samosa" src="../assets/brand/samosa.png" alt="" />
+  <img class="deco sparkler" src="../assets/brand/sparkler.png" alt="" />
+  <img class="deco jalebi" src="../assets/brand/jalebi.png" alt="" />
+  <img class="deco sparkler2" src="../assets/brand/sparkler.png" alt="" />
+</body>
+</html>

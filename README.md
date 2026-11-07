@@ -62,3 +62,6 @@ Print the PDF full bleed; the PNG is for sharing. Open `poster.html?size=a4` for
 `poster.html` is the source. To regenerate the QR code for a different URL:
 `python3 -c "import segno; segno.make('URL', error='h').save('poster/qr.svg', scale=10, border=0, dark='#14124a', light=None)"`
 then print `poster.html` from a browser with background graphics on.
+
+There's also a matching **"Lounge booked for a private event"** sign:
+`poster/lounge-sign-a4.pdf` (A4) and `poster/lounge-sign.pdf` (US Letter), source `poster/lounge-sign.html`.
