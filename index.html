@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Diwali Party Photo Booth</title>
+  <meta name="description" content="Strike a pose with Diwali Party filters: diyas, sparklers, rangoli, jalebi and samosa. Let's get LIT!" />
+  <meta name="theme-color" content="#3636E8" />
+  <link rel="icon" type="image/png" href="assets/brand/badge-diya.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Welcome -->
+  <section id="welcome" class="screen active" aria-labelledby="welcome-title">
+    <div class="welcome-inner">
+      <img class="wordmark" src="assets/brand/wordmark.png" alt="Diwali Party 2026" />
+      <h1 id="welcome-title">Photo Booth</h1>
+      <p class="tagline">Strike a pose. <span>Let’s get LIT!</span></p>
+      <div class="badge-row" aria-hidden="true">
+        <img src="assets/brand/badge-diya-blue.png" alt="" />
+        <img src="assets/brand/badge-jalebi.png" alt="" />
+        <img src="assets/brand/badge-rangoli-green.png" alt="" />
+      </div>
+      <button id="start-btn" class="btn btn-primary">Open the booth</button>
+      <label class="btn btn-ghost" for="upload-input">or use a photo</label>
+      <p id="welcome-error" class="error" role="alert" hidden></p>
+    </div>
+  </section>
+
+  <!-- Booth -->
+  <section id="booth" class="screen" aria-label="Photo booth">
+    <header class="booth-header">
+      <img src="assets/brand/wordmark.png" alt="Diwali Party 2026" class="mini-wordmark" />
+      <div class="mode-toggle" role="radiogroup" aria-label="Capture mode">
+        <button role="radio" aria-checked="true" data-mode="single">Photo</button>
+        <button role="radio" aria-checked="false" data-mode="strip">Strip ×3</button>
+      </div>
+      <button id="gallery-btn" class="icon-btn" aria-label="Your photos">
+        <span class="count" id="gallery-count">0</span>
+      </button>
+    </header>
+
+    <div class="stage-wrap">
+      <div class="stage">
+        <canvas id="stage" width="1080" height="1350" aria-label="Live camera preview with filter"></canvas>
+        <div id="countdown" class="countdown" aria-live="assertive"></div>
+        <div id="flash" class="flash"></div>
+        <div id="strip-progress" class="strip-progress" hidden></div>
+      </div>
+      <p class="hint" id="hint">Tap a sticker to add it. Drag to move, pinch or scroll to resize, double-tap to remove.</p>
+    </div>
+
+    <nav class="filters" id="filters" aria-label="Filters"></nav>
+
+    <div class="controls">
+      <button id="stickers-btn" class="side-btn" aria-expanded="false" aria-controls="sticker-tray">
+        <img src="assets/brand/samosa.png" alt="" /> <span>Stickers</span>
+      </button>
+      <button id="shutter" class="shutter" aria-label="Take photo"><span></span></button>
+      <button id="flip-btn" class="side-btn" aria-label="Switch camera">
+        <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M20 5h-3.2L15 3H9L7.2 5H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm-8 13a5 5 0 0 1-4.9-4H5l3-3 3 3H9.1A3 3 0 0 0 12 16a3 3 0 0 0 1.7-.5l1.4 1.4A5 5 0 0 1 12 18Zm4-4-3-3h1.9A3 3 0 0 0 12 10a3 3 0 0 0-1.7.5L8.9 9.1A5 5 0 0 1 16.9 12H19l-3 3Z"/></svg>
+        <span>Flip</span>
+      </button>
+    </div>
+
+    <div id="sticker-tray" class="sticker-tray" hidden>
+      <div class="tray-head">
+        <strong>Stickers</strong>
+        <button id="clear-stickers" class="link-btn">Clear all</button>
+      </div>
+      <div class="tray-grid" id="tray-grid"></div>
+    </div>
+  </section>
+
+  <!-- Result -->
+  <section id="result" class="screen" aria-label="Your photo">
+    <div class="result-inner">
+      <h2>Looking LIT! ✨</h2>
+      <img id="result-img" alt="Your Diwali Party photo" />
+      <div class="result-actions">
+        <button id="share-btn" class="btn btn-primary" hidden>Share</button>
+        <a id="download-btn" class="btn btn-primary" download="diwali-party.png">Download</a>
+        <button id="retake-btn" class="btn btn-ghost">Take another</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  <section id="gallery" class="screen" aria-label="Your photos">
+    <div class="gallery-inner">
+      <header class="gallery-head">
+        <h2>Your photos</h2>
+        <button id="gallery-close" class="btn btn-ghost small">Back to booth</button>
+      </header>
+      <p id="gallery-empty" class="muted">No photos yet. Go strike a pose!</p>
+      <div id="gallery-grid" class="gallery-grid"></div>
+    </div>
+  </section>
+
+  <input id="upload-input" type="file" accept="image/*" hidden />
+  <video id="video" playsinline muted autoplay hidden></video>
+  <script src="app.js"></script>
+</body>
+</html>
