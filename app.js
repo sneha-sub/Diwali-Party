@@ -426,99 +426,38 @@
   }
 
   // ---------- Film look ----------
-  // Warm, hazy instant-film look: soft glow, faded shadows, warm skin tones,
-  // gentle vignette and visible grain. Colour stays in. Done with blend modes
-  // (not ctx.filter) so it also works in Safari.
-  const grainTiles = [];
-  function grainTile() {
-    if (!grainTiles.length) {
-      for (let k = 0; k < 3; k++) {
-        const g = document.createElement("canvas");
-        g.width = g.height = 200;
-        const gx = g.getContext("2d");
-        const d = gx.createImageData(200, 200);
-        for (let i = 0; i < d.data.length; i += 4) {
-          const v = 128 + (Math.random() + Math.random() - 1) * 90;
-          // A little colour in the grain, like film
-          d.data[i] = v + (Math.random() - 0.5) * 24;
-          d.data[i + 1] = v + (Math.random() - 0.5) * 24;
-          d.data[i + 2] = v + (Math.random() - 0.5) * 24;
-          d.data[i + 3] = 255;
-        }
-        gx.putImageData(d, 0, 0);
-        grainTiles.push(g);
-      }
-    }
-    return grainTiles[(Math.random() * grainTiles.length) | 0];
-  }
-
-  // Two small canvases give a smooth, cheap blur (downscale twice, scale back up).
-  const blurA = document.createElement("canvas");
-  blurA.width = Math.round(W / 4);
-  blurA.height = Math.round(H / 4);
-  const blurACtx = blurA.getContext("2d");
-  const blurB = document.createElement("canvas");
-  blurB.width = Math.round(W / 12);
-  blurB.height = Math.round(H / 12);
-  const blurBCtx = blurB.getContext("2d");
-
+  // Done with blend modes (not ctx.filter) so it also works in Safari.
   const CAN_FILTER = typeof ctx.filter === "string";
 
-  /** Golden instant-film look: soft focus, amber tone, warm lifted shadows,
-   *  creamy highlights, light vignette and fine grain. */
+  /** Warm evening-light look: clear and sharp (no blur, no grain), deep blacks,
+   *  golden highlights, natural warm skin, and no cool/blue casts. */
   function filmLook(c) {
-    blurACtx.imageSmoothingEnabled = blurBCtx.imageSmoothingEnabled = true;
-    blurACtx.drawImage(c.canvas, 0, 0, blurA.width, blurA.height);
-    blurBCtx.drawImage(blurA, 0, 0, blurB.width, blurB.height);
-
     c.save();
-    c.imageSmoothingEnabled = true;
-    // Dreamy soft focus: a blurred copy laid over the sharp photo
-    c.globalAlpha = 0.6;
-    c.drawImage(blurA, 0, 0, W, H);
-    // ...and a soft glow in the highlights
-    c.globalCompositeOperation = "screen";
-    c.globalAlpha = 0.22;
-    c.drawImage(blurB, 0, 0, W, H);
-    c.globalAlpha = 1;
 
-    // Warm brown, lifted shadows (low contrast)
-    c.fillStyle = "rgb(16,12,6)";
-    c.fillRect(0, 0, W, H);
-
-    // Pull every colour towards golden amber, keeping light and dark
+    // Neutralise blue/cool casts by nudging every hue a little towards warm
     c.globalCompositeOperation = "color";
-    c.globalAlpha = 0.34;
-    c.fillStyle = "rgb(172,132,82)";
+    c.globalAlpha = 0.16;
+    c.fillStyle = "rgb(200,140,90)";
     c.fillRect(0, 0, W, H);
     c.globalAlpha = 1;
 
-    // Golden warmth through the mid-tones
+    // Warm, golden light through the mid-tones (skin glows, blacks stay black)
     c.globalCompositeOperation = "soft-light";
-    c.fillStyle = "rgba(255,170,80,.32)";
+    c.fillStyle = "rgba(255,165,80,.42)";
     c.fillRect(0, 0, W, H);
 
-    // Creamy highlights
+    // Take the blue out of the whites so highlights read as warm lamplight
     c.globalCompositeOperation = "multiply";
-    c.fillStyle = "rgb(255,243,222)";
+    c.fillStyle = "rgb(255,238,212)";
     c.fillRect(0, 0, W, H);
 
-    // Light vignette
-    const v = c.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.8);
+    // Gentle warm vignette, like a lamp-lit room
+    const v = c.createRadialGradient(W / 2, H * 0.45, H * 0.35, W / 2, H / 2, H * 0.85);
     v.addColorStop(0, "rgba(255,255,255,0)");
-    v.addColorStop(1, "rgba(80,58,30,.6)");
+    v.addColorStop(1, "rgba(120,80,45,.45)");
     c.fillStyle = v;
     c.fillRect(0, 0, W, H);
 
-    // Fine grain
-    c.globalCompositeOperation = "overlay";
-    c.globalAlpha = 0.16;
-    const tile = grainTile();
-    const step = tile.width * 1.2;
-    const ox = -Math.random() * step, oy = -Math.random() * step;
-    for (let y = oy; y < H; y += step) {
-      for (let x = ox; x < W; x += step) c.drawImage(tile, x, y, step, step);
-    }
     c.restore();
   }
 
@@ -560,7 +499,7 @@
     c.fillRect(0, 0, W, H);
     if (state.source) {
       // Punch the colour up first so the film fade doesn't leave it looking grey.
-      if (CAN_FILTER) c.filter = "saturate(1.1)";
+      if (CAN_FILTER) c.filter = "saturate(1.12) contrast(1.06)";
       drawCover(c, state.source, 0, 0, W, H, state.mirror);
       if (CAN_FILTER) {
         c.filter = "none";
@@ -568,7 +507,7 @@
         // Browsers without canvas filters: overlay the photo on itself for more colour
         c.save();
         c.globalCompositeOperation = "overlay";
-        c.globalAlpha = 0.12;
+        c.globalAlpha = 0.18;
         c.drawImage(c.canvas, 0, 0);
         c.restore();
       }
