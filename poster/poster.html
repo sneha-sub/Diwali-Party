@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Diwali Party Photo Booth Poster</title>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet" />
+<style>
+  /* US Letter, full bleed. Scales cleanly to 11x17, 18x24 (same proportions are close enough to print "fit to page"). */
+  @page { size: 8.5in 11in; margin: 0; }
+  :root {
+    --marigold: #FF7011; --magenta: #E836DC; --indigo: #3636E8; --leaf: #328532;
+    --gold: #F7C869; --rose: #FFB0FA; --ink: #14124a; --paper: #fffaf2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 8.5in; height: 11in; }
+  body {
+    position: relative; overflow: hidden;
+    font-family: "Outfit", sans-serif; color: var(--paper);
+    background-color: var(--indigo);
+    background-image: radial-gradient(rgba(255,255,255,.3) 1.6pt, transparent 1.9pt);
+    background-size: 0.3in 0.3in;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 0.45in 0.6in 0.45in; justify-content: space-between;
+  }
+  .wordmark { width: 4.3in; filter: drop-shadow(0 0.07in 0 rgba(0,0,0,.2)); }
+  h1 {
+    font-family: "Abril Fatface", serif; font-weight: 400; color: var(--gold);
+    font-size: 62pt; line-height: 1; margin-top: 0.06in;
+    text-shadow: 0 0.05in 0 var(--magenta);
+  }
+  .sub { font-size: 16pt; font-weight: 500; margin-top: 0.08in; text-align: center; }
+  .sub b { color: var(--rose); font-weight: 800; }
+
+  .qr-wrap { position: relative; margin-top: 0.1in; }
+  .qr-card {
+    width: 3.4in; height: 3.4in; background: #fff; border-radius: 0.28in;
+    padding: 0.3in; box-shadow: 0 0.1in 0 rgba(0,0,0,.22);
+    border: 0.08in solid var(--gold);
+  }
+  .qr-card img { width: 100%; height: 100%; display: block; }
+  .qr-wrap .badge { position: absolute; width: 1.25in; }
+  .b1 { left: -1.0in; top: -0.35in; transform: rotate(-12deg); }
+  .b2 { right: -1.0in; top: 0.5in; transform: rotate(10deg); }
+  .b3 { left: -0.95in; bottom: 0.15in; width: 1.05in !important; transform: rotate(8deg); }
+  .b4 { right: -0.85in; bottom: -0.3in; width: 1.1in !important; transform: rotate(-8deg); }
+  .scan {
+    margin-top: 0.2in; background: var(--marigold); color: #fff; font-weight: 800;
+    font-size: 19pt; padding: 0.08in 0.32in; border-radius: 1in; box-shadow: 0 0.05in 0 #b84a00;
+    letter-spacing: .02em;
+  }
+  .url { margin-top: 0.12in; font-size: 11pt; opacity: .85; letter-spacing: .02em; }
+
+  .steps { display: flex; gap: 0.12in; margin-top: 0.22in; }
+  .step {
+    width: 1.62in; background: var(--paper); color: var(--ink); border-radius: 0.16in;
+    padding: 0.12in 0.1in 0.12in; text-align: center; box-shadow: 0 0.05in 0 rgba(0,0,0,.2);
+  }
+  .step .n {
+    display: inline-grid; place-items: center; width: 0.34in; height: 0.34in; border-radius: 50%;
+    color: #fff; font-weight: 800; font-size: 12pt; margin-bottom: 0.05in;
+  }
+  .step:nth-child(1) .n { background: var(--magenta); }
+  .step:nth-child(2) .n { background: var(--leaf); }
+  .step:nth-child(3) .n { background: var(--marigold); }
+  .step:nth-child(4) .n { background: var(--indigo); }
+  .step p { font-weight: 700; font-size: 11.5pt; line-height: 1.15; }
+
+  .block { display: flex; flex-direction: column; align-items: center; }
+  .deco { position: absolute; }
+  .samosa { left: 0.25in; top: 0.35in; width: 1.35in; transform: rotate(-12deg); }
+  .sparkler { right: 0.3in; top: 0.3in; width: 1.1in; transform: rotate(16deg); }
+</style>
+</head>
+<body>
+  <header class="block">
+    <img class="wordmark" src="../assets/brand/wordmark.png" alt="Diwali Party 2026" />
+    <h1>Photo Booth</h1>
+    <p class="sub">Strike a pose and take home a <b>photo strip</b>.</p>
+  </header>
+  <section class="block">
+
+  <div class="qr-wrap">
+    <div class="qr-card"><img src="qr.svg" alt="QR code to the Diwali Party photo booth" /></div>
+    <img class="badge b1" src="../assets/brand/badge-diya.png" alt="" />
+    <img class="badge b2" src="../assets/brand/badge-rangoli-green.png" alt="" />
+    <img class="badge b3" src="../assets/brand/jalebi.png" alt="" />
+    <img class="badge b4" src="../assets/brand/badge-diya-blue.png" alt="" />
+  </div>
+  <div class="scan">Scan with your phone camera</div>
+  <p class="url">sneha-sub.github.io/Diwali-Party</p>
+  </section>
+
+  <div class="steps">
+    <div class="step"><span class="n">1</span><p>Scan &amp; open the booth</p></div>
+    <div class="step"><span class="n">2</span><p>Pick a filter &amp; stickers</p></div>
+    <div class="step"><span class="n">3</span><p>Pose for 3 photos</p></div>
+    <div class="step"><span class="n">4</span><p>Save to your camera roll</p></div>
+  </div>
+
+  <img class="deco samosa" src="../assets/brand/samosa.png" alt="" />
+  <img class="deco sparkler" src="../assets/brand/sparkler.png" alt="" />
+</body>
+</html>

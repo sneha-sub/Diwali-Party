@@ -51,3 +51,11 @@ Browsers only allow camera access on `https://` or `localhost`, so host it somew
 
 To add a filter, add an entry to the `FILTERS` array in `app.js` with a `name`, a CSS `swatch`,
 and a `draw(ctx, t)` function that paints over the 1080×1350 photo (`t` is time in seconds, for animation).
+
+## Poster
+
+`poster/` has a printable US Letter poster with a QR code to the booth:
+`diwali-photo-booth-poster.pdf` (print this, full bleed) and a `.png` for sharing.
+`poster.html` is the source. To regenerate the QR code for a different URL:
+`python3 -c "import segno; segno.make('URL', error='h').save('poster/qr.svg', scale=10, border=0, dark='#14124a', light=None)"`
+then print `poster.html` from a browser with background graphics on.
