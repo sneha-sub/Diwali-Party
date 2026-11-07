@@ -47,7 +47,7 @@
     facing: "user",
     stream: null,
     filter: 0,
-    mode: "single",
+    mode: "strip",
     busy: false,
     stickers: [],          // {name, x, y, size, rot}
     selected: null,
@@ -426,6 +426,7 @@
     const el = $("countdown");
     for (let i = n; i > 0; i--) {
       el.textContent = i;
+      beep(i === 1 ? 1175 : 880);
       el.classList.remove("pop");
       void el.offsetWidth;
       el.classList.add("pop");
@@ -474,42 +475,141 @@
     return c;
   }
 
+  // ---------- Sounds (tiny WebAudio synth, no files needed) ----------
+  let audio = null;
+  function ac() {
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === "suspended") audio.resume();
+    } catch { audio = null; }
+    return audio;
+  }
+  function beep(freq = 880, dur = 0.12, vol = 0.12) {
+    const a = ac(); if (!a) return;
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = "sine"; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + dur);
+    o.connect(g).connect(a.destination);
+    o.start(); o.stop(a.currentTime + dur);
+  }
+  function noise(dur, { vol = 0.2, freq = 2000, q = 0.8, wobble = 0 } = {}) {
+    const a = ac(); if (!a) return;
+    const len = Math.floor(a.sampleRate * dur);
+    const buf = a.createBuffer(1, len, a.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    const src = a.createBufferSource(); src.buffer = buf;
+    const f = a.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = freq; f.Q.value = q;
+    const g = a.createGain();
+    g.gain.setValueAtTime(vol, a.currentTime);
+    if (wobble) {
+      // Stuttering motor: dips in volume at the same moments the print pauses
+      [0.22, 0.55].forEach((p) => {
+        g.gain.setValueAtTime(vol, a.currentTime + dur * p);
+        g.gain.linearRampToValueAtTime(vol * 0.15, a.currentTime + dur * p + 0.05);
+        g.gain.setValueAtTime(vol * 0.15, a.currentTime + dur * (p + 0.07));
+        g.gain.linearRampToValueAtTime(vol, a.currentTime + dur * (p + 0.07) + 0.05);
+      });
+    }
+    g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + dur);
+    src.connect(f).connect(g).connect(a.destination);
+    src.start();
+  }
+  const shutterSound = () => { noise(0.08, { vol: 0.5, freq: 3000, q: 0.6 }); setTimeout(() => noise(0.06, { vol: 0.35, freq: 1800 }), 90); };
+  const motorSound = (dur) => noise(dur, { vol: 0.12, freq: 420, q: 2.5, wobble: 1 });
+
+  const STRIP_SHOTS = 3;
+
+  function resetFilmTray(n) {
+    const tray = $("film-tray");
+    tray.innerHTML = "";
+    for (let i = 0; i < n; i++) tray.appendChild(document.createElement("span"));
+  }
+
+  function addToFilmTray(i, canvas) {
+    const t = document.createElement("canvas");
+    t.width = 80; t.height = 100;
+    t.getContext("2d").drawImage(canvas, 0, 0, 80, 100);
+    const cell = $("film-tray").children[i];
+    if (cell) {
+      cell.style.backgroundImage = `url(${t.toDataURL("image/jpeg", 0.7)})`;
+      cell.classList.add("filled");
+    }
+  }
+
   async function capture() {
     if (state.busy) return;
+    ac(); // unlock audio on the tap
     state.busy = true;
     $("shutter").disabled = true;
     state.selected = null;
+    const tray = $("film-tray"), hint = $("hint"), prog = $("strip-progress");
     try {
       let out;
       if (state.mode === "strip") {
         const shots = [];
-        const prog = $("strip-progress");
+        resetFilmTray(STRIP_SHOTS);
+        tray.hidden = false;
+        hint.hidden = true;
         prog.hidden = false;
-        for (let i = 0; i < 3; i++) {
-          prog.textContent = `Shot ${i + 1} of 3`;
-          await countdown(i === 0 ? 3 : 2);
+        for (let i = 0; i < STRIP_SHOTS; i++) {
+          prog.textContent = `Photo ${i + 1} of ${STRIP_SHOTS}`;
+          await countdown(3);
           flash();
-          shots.push(snapshot());
-          await sleep(500);
+          shutterSound();
+          const shot = snapshot();
+          shots.push(shot);
+          addToFilmTray(i, shot);
+          await sleep(i === STRIP_SHOTS - 1 ? 700 : 900);
         }
-        prog.hidden = true;
         out = buildStrip(shots);
       } else {
         await countdown(3);
         flash();
+        shutterSound();
         out = snapshot();
-        await sleep(350);
+        await sleep(600);
       }
       await showResult(out);
     } finally {
       state.busy = false;
       $("shutter").disabled = false;
+      tray.hidden = true;
+      hint.hidden = false;
+      prog.hidden = true;
     }
   }
 
   function canvasToBlob(c) {
     return new Promise((res) => c.toBlob(res, "image/png"));
   }
+
+  /** Save to the camera roll where possible: the share sheet on phones has "Save Image". */
+  async function saveImage(blob, name) {
+    const file = new File([blob], name, { type: "image/png" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        // Files only: adding text can hide "Save Image" on iPhone.
+        await navigator.share({ files: [file] });
+        return;
+      } catch (err) {
+        if (err && err.name === "AbortError") return; // they closed the sheet
+      }
+    }
+    if (hostDownloads) {
+      hostDownloads.save({ filename: name, data: blob }).catch(() => {});
+      return;
+    }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  let printRun = 0;
 
   async function showResult(canvas) {
     const blob = await canvasToBlob(canvas);
@@ -520,22 +620,52 @@
     state.lastShotUrl = url;
     $("gallery-count").textContent = state.photos.length;
 
-    $("result-img").src = url;
-    const dl = $("download-btn");
-    dl.href = url;
-    dl.download = name;
-    dl.onclick = (e) => saveViaHost(e, blob, name);
+    const canShareFiles = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], name, { type: "image/png" })] }));
+    $("save-btn").textContent = canShareFiles ? "Save to Camera Roll" : "Download";
+    $("save-hint").hidden = !canShareFiles;
+    $("save-btn").onclick = () => saveImage(blob, name);
 
-    const shareBtn = $("share-btn");
-    const file = new File([blob], name, { type: "image/png" });
-    const canShare = !!(navigator.canShare && navigator.canShare({ files: [file] }));
-    shareBtn.hidden = !canShare;
-    shareBtn.onclick = async () => {
-      try {
-        await navigator.share({ files: [file], title: "Diwali Party 2026", text: "Let’s get LIT! 🪔✨" });
-      } catch (_) { /* user cancelled */ }
-    };
+    // Size the print so the whole thing fits on screen once it has dropped out.
+    const ratio = canvas.height / canvas.width;
+    const availH = Math.max(260, window.innerHeight - 330);
+    const maxW = state.mode === "strip" ? 200 : 250;
+    const w = Math.round(Math.min(maxW, window.innerWidth - 64, availH / ratio));
+    const inner = document.querySelector("#result .result-inner");
+    inner.style.setProperty("--print-w", `${w}px`);
+    inner.style.setProperty("--print-h", `${Math.round(w * ratio) + 12}px`);
+
+    const pic = $("result-img");
+    const print = $("print");
+    const status = $("develop-status");
+    const actions = $("result-actions");
+    pic.src = url;
+    try { await pic.decode(); } catch { /* shows when loaded */ }
+
+    const run = ++printRun;
+    pic.className = "undeveloped";
+    print.className = "print";
+    actions.classList.add("waiting");
+    inner.classList.add("printing");
+    status.textContent = "Printing…";
     show("result");
+    window.scrollTo(0, 0);
+
+    void print.offsetWidth;
+    print.classList.add("feeding");
+    motorSound(3.4);
+    await sleep(3400);
+    if (run !== printRun) return;
+
+    print.className = "print dropped";
+    status.textContent = "Developing…";
+    void pic.offsetWidth;
+    pic.className = "developing";
+    inner.classList.remove("printing");
+    await sleep(2600);
+    if (run !== printRun) return;
+
+    status.textContent = "Looking LIT! ✨";
+    actions.classList.remove("waiting");
   }
 
   // When running inside a claude.ai artifact, plain <a download> links are blocked,
@@ -800,7 +930,10 @@
       toggleTray(false);
     });
 
-    $("retake-btn").addEventListener("click", () => show("booth"));
+    $("retake-btn").addEventListener("click", () => {
+      printRun++;
+      show("booth");
+    });
     $("gallery-btn").addEventListener("click", () => {
       renderGallery();
       show("gallery");

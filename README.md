@@ -21,9 +21,9 @@ Guests open the booth, pick a filter, add stickers, and strike a pose. **Let's g
   | Clean | Just a small wordmark in the corner |
 - **Stickers**: tap to add any brand illustration. Drag to move, pinch (or scroll) to resize,
   two-finger twist (or shift+scroll) to rotate, double-tap (or Delete) to remove
-- **3-2-1 countdown** with a flash. Press Space to shoot on a laptop
-- **Photo strip mode**: three shots laid out as a classic booth strip
-- **Download** or **Share** (native share sheet on phones), plus a gallery of this session's photos
+- **Booth-style shooting**: press the shutter and it takes 3 photos, each with a 3-2-1 timer, beep, shutter sound and flash, filling a film tray as it goes. Press Space to shoot on a laptop
+- **Printing**: the strip feeds out of a brand-styled booth printer and develops from a pale blank into full colour. Single mode prints one photo the same way
+- **Save to Camera Roll**: opens the phone share sheet (on iPhone, "Save Image" puts it in Photos); downloads on desktop. Plus a gallery of this visit's photos
 - **Use a photo** if the camera isn't available
 
 Photos are processed entirely in the browser. Nothing is uploaded.

@@ -35,8 +35,8 @@
     <header class="booth-header">
       <img src="assets/brand/wordmark.png" alt="Diwali Party 2026" class="mini-wordmark" />
       <div class="mode-toggle" role="radiogroup" aria-label="Capture mode">
-        <button role="radio" aria-checked="true" data-mode="single">Photo</button>
-        <button role="radio" aria-checked="false" data-mode="strip">Strip ×3</button>
+        <button role="radio" aria-checked="true" data-mode="strip">Strip ×3</button>
+        <button role="radio" aria-checked="false" data-mode="single">Single</button>
       </div>
       <button id="gallery-btn" class="icon-btn" aria-label="Your photos">
         <span class="count" id="gallery-count">0</span>
@@ -50,6 +50,7 @@
         <div id="flash" class="flash"></div>
         <div id="strip-progress" class="strip-progress" hidden></div>
       </div>
+      <div id="film-tray" class="film-tray" hidden aria-hidden="true"></div>
       <p class="hint" id="hint">Tap a sticker to add it. Drag to move, pinch or scroll to resize, double-tap to remove.</p>
     </div>
 
@@ -75,15 +76,25 @@
     </div>
   </section>
 
-  <!-- Result -->
-  <section id="result" class="screen" aria-label="Your photo">
+  <!-- Result: the booth printer -->
+  <section id="result" class="screen" aria-label="Your photos are printing">
     <div class="result-inner">
-      <h2>Looking LIT! ✨</h2>
-      <img id="result-img" alt="Your Diwali Party photo" />
-      <div class="result-actions">
-        <button id="share-btn" class="btn btn-primary" hidden>Share</button>
-        <a id="download-btn" class="btn btn-primary" download="diwali-party.png">Download</a>
-        <button id="retake-btn" class="btn btn-ghost">Take another</button>
+      <div class="printer" aria-hidden="true">
+        <div class="printer-lights"><i></i><i></i><i></i><i></i><i></i></div>
+        <img src="assets/brand/wordmark.png" alt="" class="printer-wordmark" />
+        <div class="printer-label">PHOTO BOOTH</div>
+        <div class="printer-slot"></div>
+      </div>
+      <div class="print-window" id="print-window">
+        <div class="print" id="print">
+          <img id="result-img" alt="Your Diwali Party photo strip" />
+        </div>
+      </div>
+      <p id="develop-status" class="develop-status" aria-live="polite">Printing…</p>
+      <div class="result-actions" id="result-actions">
+        <button id="save-btn" class="btn btn-primary">Save to Camera Roll</button>
+        <button id="retake-btn" class="btn btn-ghost">Take more</button>
+        <p class="save-hint" id="save-hint">Tip: you can also press and hold the photo to save it.</p>
       </div>
     </div>
   </section>
